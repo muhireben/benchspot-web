@@ -1,0 +1,21 @@
+# Local configuration
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local backups and generated copies
+backup*/
+index.backup.html
+
+# Editor and operating system files
+.idea/
+.vscode/
+.qodo/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#fff4e6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Bench Spot">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Bench Spot — Belgium</title>
+    <link rel="icon" type="image/png" href="assets/benchspot-icon.png">
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://tile.openstreetmap.org">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="welcome-mode">
+    <div class="app">
+      <header class="site-header" id="site-header">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">
+            <img src="assets/benchspot-icon.png" alt="">
+          </span>
+          bench spot
+        </div>
+        <div class="header-note">A little room to pause.</div>
+      </header>
+
+      <main>
+        <section class="welcome-screen page-section" id="welcome-screen" aria-labelledby="welcome-title">
+          <div class="welcome-content">
+            <div class="welcome-intro">
+              <p class="welcome-kicker">Bench Spot · Belgium</p>
+              <h1 class="welcome-title" id="welcome-title">Find your little pause.</h1>
+              <p class="welcome-subtitle">Choose a city and discover a place to sit, slow down, and stay awhile.</p>
+            </div>
+            <div class="city-nav">
+              <span class="city-nav-label">Choose a city to explore</span>
+              <select class="city-select" id="city-select" aria-hidden="true" tabindex="-1">
+                <option value="" selected>Choose a city…</option>
+                <option value="belgium">Explore all Belgium</option>
+                <option value="50.8503,4.3517">Brussels</option>
+                <option value="51.2194,4.4025">Antwerp</option>
+                <option value="51.0543,3.7174">Ghent</option>
+                <option value="50.4108,4.4446">Charleroi</option>
+                <option value="50.6326,5.5797">Liège</option>
+                <option value="50.8798,4.7005">Leuven</option>
+                <option value="51.2093,3.2247">Bruges</option>
+                <option value="50.4674,4.8718">Namur</option>
+                <option value="50.4542,3.9563">Mons</option>
+                <option value="51.0259,4.4776">Mechelen</option>
+                <option value="50.9307,5.3325">Hasselt</option>
+                <option value="50.6056,3.3878">Tournai</option>
+                <option value="50.8278,3.2650">Kortrijk</option>
+                <option value="51.2300,2.9110">Ostend</option>
+                <option value="50.4782,4.1873">La Louvière</option>
+                <option value="50.6680,4.6110">Louvain-la-Neuve</option>
+              </select>
+              <div class="city-picker" id="city-picker">
+                <button class="city-picker-trigger" id="city-picker-trigger" type="button"
+                  aria-haspopup="listbox" aria-expanded="false" aria-controls="city-picker-menu">
+                  <span id="city-picker-label">Choose a city…</span>
+                  <span class="city-picker-chevron" aria-hidden="true">▾</span>
+                </button>
+                <div class="city-picker-menu" id="city-picker-menu" hidden>
+                  <input class="city-picker-search" id="city-picker-search" type="search"
+                    placeholder="Search or browse cities…" autocomplete="off"
+                    aria-label="Search cities" aria-controls="city-picker-options">
+                  <div class="city-picker-options" id="city-picker-options" role="listbox"
+                    aria-label="Belgian cities"></div>
+                </div>
+              </div>
+              <div class="location-picker">
+                <p class="location-picker-heading">Or find places close to you</p>
+                <button class="secondary-button location-picker-button" id="locate-button" type="button">Use my location</button>
+                <p class="location-picker-help">Your location is only used to find nearby benches.</p>
+                <p class="location-picker-status" id="location-picker-status" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+            <div class="welcome-outro">
+              <p><strong>No rush.</strong> Your next quiet moment is waiting.</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="city-page" id="city-page" hidden>
+          <section class="map-section" id="map-section" aria-label="Bench map">
+            <div class="map-wrap" aria-label="Interactive map of benches">
+              <div id="map" role="application" aria-label="Interactive OpenStreetMap of benches. Tap anywhere on the map to add a spot."></div>
+
+              <div class="map-top-controls">
+                <div class="map-city-tile" aria-label="Current area">
+                  <span class="map-city-dot" aria-hidden="true"></span>
+                  <span id="map-city-label">Belgium</span>
+                </div>
+                <div class="map-actions">
+                  <button class="change-city-button" id="map-locate-button" type="button">Use my location</button>
+                  <button class="change-city-button" id="change-city-button" type="button">Change city</button>
+                </div>
+              </div>
+
+              <div class="map-feedback" aria-live="polite">
+                <p class="location-status map-location-status" id="location-status" role="status"></p>
+                <p class="hint" id="map-hint" role="status">Tap the map where you found a bench. You can adjust the pin before saving.</p>
+                <p class="storage-status" id="storage-status" role="alert" hidden></p>
+              </div>
+
+              <section class="suggestions-section" id="suggestions-section" aria-labelledby="spots-title" hidden>
+                <div class="library-heading">
+                  <h2 id="spots-title"><span id="library-heading">The library</span> · <span class="library-city-name" id="library-city-name"></span></h2>
+                  <span class="count" id="spot-count">0</span>
+                  <button class="library-refresh-button" id="refresh-library-button" type="button" aria-label="Refresh shared library" title="Refresh shared library">↻</button>
+                  <button class="library-close-button" id="close-library-button" type="button" aria-label="Close library">×</button>
+                </div>
+                <div class="spot-list" id="spot-list"></div>
+                <div class="nearby-options" id="nearby-options" hidden>
+                  <label for="nearby-radius">Show benches within</label>
+                  <select id="nearby-radius">
+                    <option value="1">1 km</option>
+                    <option value="5">5 km</option>
+                    <option value="10" selected>10 km</option>
+                    <option value="25">25 km</option>
+                  </select>
+                </div>
+                <button class="secondary-button add-here-button" id="add-here-button" type="button" hidden>Spot a bench here</button>
+              </section>
+
+              <div class="map-bottom-actions">
+                <button class="add-button" id="add-button" type="button" aria-pressed="false">
+                  <span class="plus" aria-hidden="true">+</span> Spot a bench
+                </button>
+                <button class="map-library-button" id="library-button" type="button"
+                  aria-controls="suggestions-section" aria-expanded="false">Library</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+      <footer class="page-footer page-section">
+        Bench data is shared through Supabase. Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>.
+      </footer>
+    </div>
+
+    <dialog class="spot-dialog" id="spot-dialog" aria-labelledby="dialog-title">
+      <form class="form-content" id="spot-form">
+        <div class="form-top">
+          <div>
+            <h2 id="dialog-title">Add a bench</h2>
+            <p>Confirm the spot and its rating. Add a note, photos or a review if you like.</p>
+          </div>
+          <button class="close-button" id="close-dialog" type="button" aria-label="Close">×</button>
+        </div>
+        <label for="spot-name">Spot name <span style="color:var(--cocoa);font-weight:400">(optional)</span></label>
+        <input id="spot-name" name="name" maxlength="60" placeholder="Finding a nearby place name…">
+        <p class="photo-help" id="spot-name-help">A suggested name will use the nearby place; change it if you like.</p>
+        <label for="spot-kind">Type of place</label>
+        <select id="spot-kind" name="kind">
+          <option value="Bench">Bench</option>
+          <option value="Picnic table">Picnic table</option>
+          <option value="Other seat">Other seat</option>
+        </select>
+        <fieldset style="margin:14px 0 0;padding:0;border:0">
+          <legend style="font-size:12px;font-weight:700">Add this spot and rate it</legend>
+          <div class="rating-options" aria-label="Choose a rating">
+            <input id="spot-rating-5" type="radio" name="spot-rating" value="5" checked><label for="spot-rating-5" aria-label="5 stars">★</label>
+            <input id="spot-rating-4" type="radio" name="spot-rating" value="4"><label for="spot-rating-4" aria-label="4 stars">★</label>
+            <input id="spot-rating-3" type="radio" name="spot-rating" value="3"><label for="spot-rating-3" aria-label="3 stars">★</label>
+            <input id="spot-rating-2" type="radio" name="spot-rating" value="2"><label for="spot-rating-2" aria-label="2 stars">★</label>
+            <input id="spot-rating-1" type="radio" name="spot-rating" value="1" required><label for="spot-rating-1" aria-label="1 star">★</label>
+          </div>
+        </fieldset>
+        <div class="spot-actions" aria-label="Optional spot details">
+          <button class="spot-action" id="open-note-action" type="button"><span class="spot-action-icon" aria-hidden="true">✎</span><span>Note</span></button>
+          <button class="spot-action" id="open-photos-action" type="button"><span class="spot-action-icon" aria-hidden="true">▧</span><span>Photos</span></button>
+          <button class="spot-action" id="open-review-action" type="button"><span class="spot-action-icon" aria-hidden="true">☰</span><span>Review</span></button>
+          <p class="spot-action-summary" id="spot-action-summary">Note, photos and written review are optional. Reviews are anonymous unless you add your name.</p>
+        </div>
+        <div class="coordinates" id="coordinates"></div>
+        <div class="form-actions">
+          <button class="secondary-button" id="cancel-dialog" type="button">Cancel</button>
+          <button class="save-button" type="submit">Add spot</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="spot-note-dialog" aria-labelledby="spot-note-title">
+      <form class="form-content" id="spot-note-form">
+        <div class="form-top">
+          <div><h2 id="spot-note-title">Add a note</h2><p>Share a helpful detail, if you want.</p></div>
+          <button class="close-button" id="close-spot-note" type="button" aria-label="Close">×</button>
+        </div>
+        <label for="spot-note">Note <span style="color:var(--cocoa);font-weight:400">(optional)</span></label>
+        <textarea id="spot-note" name="note" maxlength="180" placeholder="Shade, step-free access, a nice view…"></textarea>
+        <div class="form-actions"><button class="save-button" type="submit">Save note</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="spot-photos-dialog" aria-labelledby="spot-photos-title">
+      <div class="form-content">
+        <div class="form-top">
+          <div><h2 id="spot-photos-title">Add photos</h2><p>Choose photos from your device or take a picture. Up to 3 photos.</p></div>
+          <button class="close-button" id="close-spot-photos" type="button" aria-label="Close">×</button>
+        </div>
+        <div class="photo-source-actions">
+          <input class="photo-input" id="spot-review-photos" type="file" accept="image/*" multiple>
+          <label class="photo-picker" for="spot-review-photos">Choose from device</label>
+          <input class="photo-input" id="spot-camera-photo" type="file" accept="image/*" capture="environment">
+          <label class="photo-picker" for="spot-camera-photo">Take a picture</label>
+        </div>
+        <p class="photo-help" id="spot-photo-help">Add up to 3 photos. Images are resized before saving.</p>
+        <div class="photo-preview-list" id="spot-photo-preview-list" aria-live="polite"></div>
+        <div class="form-actions"><button class="save-button" id="save-spot-photos" type="button">Done</button></div>
+      </div>
+    </dialog>
+
+    <dialog id="spot-review-dialog" aria-labelledby="spot-review-title">
+      <form class="form-content" id="spot-review-form">
+        <div class="form-top">
+          <div><h2 id="spot-review-title">Add a review</h2><p>Your rating is already included. Add a comment and name if you wish.</p></div>
+          <button class="close-button" id="close-spot-review" type="button" aria-label="Close">×</button>
+        </div>
+        <label for="spot-review-name">Your name <span style="color:var(--cocoa);font-weight:400">(optional)</span></label>
+        <input id="spot-review-name" name="review-author" maxlength="40" autocomplete="name" placeholder="Anonymous by default">
+        <label for="spot-review-text">How was this bench? <span style="color:var(--cocoa);font-weight:400">(optional)</span></label>
+        <textarea id="spot-review-text" name="review-text" maxlength="500" placeholder="Comfort, surroundings, accessibility…"></textarea>
+        <div class="form-actions"><button class="save-button" type="submit">Save review</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="detail-dialog" id="detail-dialog" aria-labelledby="detail-title">
+      <div class="detail-content">
+        <div class="detail-heading">
+          <div>
+            <p class="detail-eyebrow">Bench spot</p>
+            <h2 id="detail-title"></h2>
+            <p class="detail-meta" id="detail-meta"></p>
+          </div>
+          <button class="close-button" id="close-detail" type="button" aria-label="Close bench details">×</button>
+        </div>
+        <div class="detail-rating" id="detail-rating"></div>
+        <div class="detail-photos" id="detail-photos" aria-label="Community photos"></div>
+        <div class="detail-section-heading">
+          <h3>Reviews</h3>
+          <button class="review-button" id="add-review-button" type="button">Write a review</button>
+        </div>
+        <div class="review-list" id="review-list"></div>
+        <div class="detail-bottom">
+          <button class="secondary-button" id="close-detail-bottom" type="button">Done</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="review-dialog" aria-labelledby="review-dialog-title">
+      <form class="form-content" id="review-form">
+        <div class="form-top">
+          <div>
+            <h2 id="review-dialog-title">Write a review</h2>
+            <p id="review-bench-name"></p>
+          </div>
+          <button class="close-button" id="close-review" type="button" aria-label="Close">×</button>
+        </div>
+        <label for="review-name">Your name <span style="color:var(--cocoa);font-weight:400">(optional)</span></label>
+        <input id="review-name" name="author" maxlength="40" autocomplete="name" placeholder="Anonymous by default">
+        <fieldset style="margin:14px 0 0;padding:0;border:0">
+          <legend style="font-size:12px;font-weight:700">Your rating</legend>
+          <div class="rating-options" aria-label="Choose a rating">
+            <input id="rating-5" type="radio" name="rating" value="5" checked><label for="rating-5" aria-label="5 stars">★</label>
+            <input id="rating-4" type="radio" name="rating" value="4"><label for="rating-4" aria-label="4 stars">★</label>
+            <input id="rating-3" type="radio" name="rating" value="3"><label for="rating-3" aria-label="3 stars">★</label>
+            <input id="rating-2" type="radio" name="rating" value="2"><label for="rating-2" aria-label="2 stars">★</label>
+            <input id="rating-1" type="radio" name="rating" value="1" required><label for="rating-1" aria-label="1 star">★</label>
+          </div>
+        </fieldset>
+        <label for="review-text">What should others know? <span style="color:var(--cocoa);font-weight:400">(optional)</span></label>
+        <textarea id="review-text" name="text" maxlength="500" placeholder="Comfort, surroundings, accessibility…"></textarea>
+        <label for="review-photos-input">Add photos <span style="color:var(--cocoa);font-weight:400">(optional)</span></label>
+        <input class="photo-input" id="review-photos-input" type="file" accept="image/*" multiple>
+        <label class="photo-picker" for="review-photos-input">Choose photos</label>
+        <p class="photo-help" id="photo-help">Add up to 3 photos. Images are resized before saving.</p>
+        <div class="photo-preview-list" id="photo-preview-list" aria-live="polite"></div>
+        <div class="form-actions">
+          <button class="secondary-button" id="cancel-review" type="button">Cancel</button>
+          <button class="save-button" type="submit">Post review</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

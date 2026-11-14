@@ -1,0 +1,63 @@
+name: Deploy web app to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Configure public Supabase client
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+
+          const url = process.env.SUPABASE_URL;
+          const key = process.env.SUPABASE_ANON_KEY;
+          if (!url || !key) {
+            throw new Error("Set the SUPABASE_URL and SUPABASE_ANON_KEY repository variables before deploying.");
+          }
+
+          const config = [
+            `export const SUPABASE_URL = ${JSON.stringify(url)};`,
+            `export const SUPABASE_ANON_KEY = ${JSON.stringify(key)};`,
+            "",
+          ].join("\n");
+          fs.writeFileSync("js/supabase-config.js", config);
+          NODE
+
+      - name: Upload website artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: |
+            index.html
+            styles.css
+            js
+            assets
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
