@@ -42,19 +42,21 @@ changes are pushed to `main`, or when started manually from the Actions tab. It
 publishes only `index.html`, `styles.css`, `js/`, and `assets/`; the local
 server, database schema, importer, and legacy JSON are not deployed.
 
-Before the first deployment:
+To enable the shared Supabase library on the deployed site:
 
-1. In the repository settings, enable **Pages** with **GitHub Actions** as the
-   build and deployment source.
-2. Add repository variables named `SUPABASE_URL` and `SUPABASE_ANON_KEY` under
+1. Add repository variables named `SUPABASE_URL` and `SUPABASE_ANON_KEY` under
    **Settings → Secrets and variables → Actions → Variables**. Use the project
    URL and public publishable/anon key; never put a service-role key in the
    workflow or browser app.
+2. Push a commit or run the workflow manually to publish with the configured
+   Supabase client.
 
 The workflow writes those public client values into the generated
 `js/supabase-config.js` in the deployment artifact. The checked-in file stays
-blank so project-specific values are not committed. A deployment fails with an
-explicit error if either variable is missing.
+blank so project-specific values are not committed. The static site can deploy
+without Supabase variables, but its shared bench library will not work until
+both variables are set. If only one is set, deployment stops with an explicit
+error.
 
 ## Legacy JSON data
 

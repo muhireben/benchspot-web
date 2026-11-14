@@ -37,8 +37,12 @@ jobs:
 
           const url = process.env.SUPABASE_URL;
           const key = process.env.SUPABASE_ANON_KEY;
+          if (!url && !key) {
+            console.log("Supabase variables are not set; deploying the static app without shared-data access.");
+            process.exit(0);
+          }
           if (!url || !key) {
-            throw new Error("Set the SUPABASE_URL and SUPABASE_ANON_KEY repository variables before deploying.");
+            throw new Error("Set both SUPABASE_URL and SUPABASE_ANON_KEY repository variables, or leave both unset.");
           }
 
           const config = [
@@ -49,14 +53,17 @@ jobs:
           fs.writeFileSync("js/supabase-config.js", config);
           NODE
 
+      - name: Prepare website files
+        run: |
+          mkdir -p _site
+          cp index.html styles.css _site/
+          cp -R js assets _site/
+          touch _site/.nojekyll
+
       - name: Upload website artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: |
-            index.html
-            styles.css
-            js
-            assets
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment

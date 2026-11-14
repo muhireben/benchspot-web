@@ -12,6 +12,7 @@ venv/
 # Local backups and generated copies
 backup*/
 index.backup.html
+_site/
 
 # Editor and operating system files
 .idea/
